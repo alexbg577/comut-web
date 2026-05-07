@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuto Comut — Guide complet de déploiement</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #6366f1; --primary-dark: #4f46e5; --secondary: #8b5cf6;
+      --bg: #0f172a; --surface: #1e293b; --surface2: #334155;
+      --border: #334155; --text: #f1f5f9; --text-muted: #94a3b8; --text-dim: #64748b;
+      --green: #10b981; --yellow: #f59e0b; --red: #ef4444; --blue: #3b82f6;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+    /* SIDEBAR */
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 280px; min-height: 100vh; position: fixed; top: 0; left: 0;
+      background: var(--surface); border-right: 1px solid var(--border);
+      padding: 24px 0; overflow-y: auto; z-index: 100;
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 24px 28px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .sidebar-logo-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: white; }
+    .sidebar-logo-text { font-size: 18px; font-weight: 800; color: var(--primary); }
+    .sidebar-logo-sub { font-size: 10px; color: var(--text-dim); font-weight: 500; }
+    .sidebar-section { padding: 8px 24px 4px; font-size: 10px; font-weight: 700; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; }
+    .sidebar a { display: flex; align-items: center; gap: 10px; padding: 9px 24px; text-decoration: none; color: var(--text-muted); font-size: 13px; font-weight: 500; transition: all 0.2s; border-left: 2px solid transparent; }
+    .sidebar a:hover, .sidebar a.active { color: var(--primary); background: rgba(99,102,241,0.08); border-left-color: var(--primary); }
+    .sidebar a .step-num { width: 20px; height: 20px; border-radius: 6px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+    .sidebar a.active .step-num { background: var(--primary); color: white; }
+
+    /* MAIN */
+    .main { margin-left: 280px; padding: 48px 64px; max-width: 1000px; }
+
+    /* HEADER */
+    .page-header { margin-bottom: 56px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .page-header h1 { font-size: 42px; font-weight: 900; color: var(--text); letter-spacing: -1px; margin-bottom: 12px; }
+    .page-header p { font-size: 16px; color: var(--text-muted); line-height: 1.7; max-width: 600px; }
+    .badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+    .badge { padding: 4px 12px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+    .badge-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+    .badge-purple { background: rgba(99,102,241,0.15); color: var(--primary); border: 1px solid rgba(99,102,241,0.3); }
+
+    /* SECTIONS */
+    .section { margin-bottom: 72px; scroll-margin-top: 32px; }
+    .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+    .section-num { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: white; flex-shrink: 0; }
+    .section h2 { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+    .section-desc { color: var(--text-muted); font-size: 15px; margin-bottom: 24px; line-height: 1.7; }
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 56px 0; }
+
+    /* STEPS */
+    .step-list { display: flex; flex-direction: column; gap: 16px; }
+    .step-item { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .step-item-header { display: flex; align-items: center; gap: 14px; padding: 18px 20px; }
+    .step-item-num { width: 28px; height: 28px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: white; flex-shrink: 0; }
+    .step-item-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .step-item-body { padding: 0 20px 18px 62px; }
+    .step-item-desc { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+
+    /* CODE BLOCKS */
+    .code-block { background: #0d1117; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 16px 0; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); }
+    .code-lang { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+    .code-copy { font-size: 11px; color: var(--text-dim); cursor: pointer; padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--text-muted); transition: all 0.2s; }
+    .code-copy:hover { color: var(--primary); border-color: var(--primary); }
+    pre { padding: 20px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; }
+    code { color: #e2e8f0; }
+    .hl-comment { color: #64748b; }
+    .hl-key { color: #a78bfa; }
+    .hl-val { color: #34d399; }
+    .hl-str { color: #fbbf24; }
+    .hl-cmd { color: #60a5fa; }
+
+    /* CALLOUTS */
+    .callout { display: flex; gap: 14px; padding: 16px 18px; border-radius: 12px; margin: 16px 0; }
+    .callout-info { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); }
+    .callout-warn { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); }
+    .callout-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); }
+    .callout-danger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); }
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+    .callout-content { flex: 1; }
+    .callout-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .callout-info .callout-title { color: var(--blue); }
+    .callout-warn .callout-title { color: var(--yellow); }
+    .callout-success .callout-title { color: var(--green); }
+    .callout-danger .callout-title { color: var(--red); }
+    .callout-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ENV TABLE */
+    .env-table { width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .env-table th { background: var(--surface2); padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .env-table td { padding: 10px 16px; font-size: 13px; border-top: 1px solid var(--border); vertical-align: top; }
+    .env-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .env-key { font-family: 'JetBrains Mono', monospace; color: #a78bfa; font-size: 12px; }
+    .env-val { font-family: 'JetBrains Mono', monospace; color: #34d399; font-size: 12px; word-break: break-all; }
+    .env-desc { color: var(--text-muted); font-size: 12px; }
+
+    /* CHECKLIST */
+    .checklist { display: flex; flex-direction: column; gap: 8px; }
+    .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 14px; color: var(--text-muted); }
+    .check-box { width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border); flex-shrink: 0; margin-top: 1px; }
+    .check-item strong { color: var(--text); }
+
+    /* PROJECT CARDS */
+    .project-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; }
+    .project-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; transition: all 0.2s; }
+    .project-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .project-card-icon { font-size: 32px; margin-bottom: 10px; }
+    .project-card-name { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .project-card-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+    .project-card-tech { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+    .tech-pill { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; background: rgba(99,102,241,0.15); color: var(--primary); }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 24px 20px; }
+      .project-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">C</div>
+    <div>
+      <div class="sidebar-logo-text">Comut</div>
+      <div class="sidebar-logo-sub">Guide de déploiement</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">Vue d'ensemble</div>
+  <a href="#overview"><span class="step-num">★</span> Introduction</a>
+  <a href="#projects"><span class="step-num">★</span> Les 3 projets</a>
+
+  <div class="sidebar-section">Backend (Render)</div>
+  <a href="#s1"><span class="step-num">1</span> Créer le repo GitHub</a>
+  <a href="#s2"><span class="step-num">2</span> Variables d'environnement</a>
+  <a href="#s3"><span class="step-num">3</span> Déployer sur Render</a>
+
+  <div class="sidebar-section">Site Web (GitHub Pages)</div>
+  <a href="#s4"><span class="step-num">4</span> Créer le repo web</a>
+  <a href="#s5"><span class="step-num">5</span> Activer GitHub Pages</a>
+
+  <div class="sidebar-section">App Mobile (Expo)</div>
+  <a href="#s6"><span class="step-num">6</span> Installer les outils</a>
+  <a href="#s7"><span class="step-num">7</span> Configurer l'app</a>
+  <a href="#s8"><span class="step-num">8</span> Build APK avec EAS</a>
+  <a href="#s9"><span class="step-num">9</span> Installer l'APK</a>
+
+  <div class="sidebar-section">Vérification</div>
+  <a href="#s10"><span class="step-num">10</span> Tester tout</a>
+  <a href="#faq"><span class="step-num">?</span> FAQ</a>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header" id="overview">
+    <h1>📘 Guide Comut</h1>
+    <p>Ce tutoriel vous guide pas-à-pas pour déployer les 3 projets Comut : le backend sur Render, le site sur GitHub Pages, et l'APK Android via Expo EAS Build.</p>
+    <div class="badges">
+      <span class="badge badge-green">✅ Testé et fonctionnel</span>
+      <span class="badge badge-blue">⏱ ~30 min de déploiement</span>
+      <span class="badge badge-yellow">📱 Android uniquement</span>
+      <span class="badge badge-purple">🆓 Gratuit (plans free)</span>
+    </div>
+  </div>
+
+  <!-- LES 3 PROJETS -->
+  <div class="section" id="projects">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <h2>Les 3 projets</h2>
+    </div>
+    <div class="project-grid">
+      <div class="project-card">
+        <div class="project-card-icon">⚙️</div>
+        <div class="project-card-name">comut-backend</div>
+        <div class="project-card-desc">API REST Node.js. Gère l'auth, les groupes, les uploads et les médias.</div>
+        <div class="project-card-tech">
+          <span class="tech-pill">Node.js</span>
+          <span class="tech-pill">Express</span>
+          <span class="tech-pill">MongoDB</span>
+          <span class="tech-pill">Render</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="project-card-icon">📱</div>
+        <div class="project-card-name">comut-app</div>
+        <div class="project-card-desc">Application mobile React Native. Build en APK via Expo EAS Build cloud.</div>
+        <div class="project-card-tech">
+          <span class="tech-pill">React Native</span>
+          <span class="tech-pill">Expo</span>
+          <span class="tech-pill">EAS Build</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="project-card-icon">🌐</div>
+        <div class="project-card-name">comut-web</div>
+        <div class="project-card-desc">Site vitrine hébergé sur GitHub Pages. Présente l'application.</div>
+        <div class="project-card-tech">
+          <span class="tech-pill">HTML/CSS</span>
+          <span class="tech-pill">GitHub Pages</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════ BACKEND ═══════════════════════ -->
+
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>Créer le repo comut-backend sur GitHub</h2>
+    </div>
+    <p class="section-desc">Vous allez créer un nouveau repo GitHub public et y uploader le dossier <code>comut-backend</code> depuis le ZIP téléchargé.</p>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-item-header">
+          <div class="step-item-num">1</div>
+          <div class="step-item-title">Créer le repo sur GitHub</div>
+        </div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Allez sur <strong>github.com</strong> → <strong>New repository</strong>. Nom : <code>comut-backend</code>. Visibilité : <strong>Public</strong>. Ne cochez rien d'autre. Cliquez <strong>Create repository</strong>.</div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-item-header">
+          <div class="step-item-num">2</div>
+          <div class="step-item-title">Extraire le ZIP et initialiser Git</div>
+        </div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Extrayez le ZIP <code>comut-backend.zip</code> sur votre ordinateur. Ouvrez un terminal dans le dossier <code>comut-backend</code> et exécutez :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+            <pre><code><span class="hl-cmd">cd</span> comut-backend
+<span class="hl-cmd">git</span> init
+<span class="hl-cmd">git</span> add -A
+<span class="hl-cmd">git</span> commit -m <span class="hl-str">"🚀 Initial commit: Comut Backend v1.0"</span>
+<span class="hl-cmd">git</span> branch -M main
+<span class="hl-cmd">git</span> remote add origin https://github.com/alexbg577/comut-backend.git
+<span class="hl-cmd">git</span> push -u origin main</code></pre>
+          </div>
+          <div class="callout callout-info">
+            <div class="callout-icon">ℹ️</div>
+            <div class="callout-content">
+              <div class="callout-title">Authentification Git</div>
+              <div class="callout-text">Si Git vous demande un mot de passe, utilisez votre <strong>Personal Access Token</strong> GitHub (pas votre mot de passe habituel). Settings → Developer settings → Personal access tokens → Fine-grained tokens.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>Variables d'environnement</h2>
+    </div>
+    <p class="section-desc">Ces variables sont nécessaires au bon fonctionnement du backend. Vous les configurerez sur Render à l'étape suivante.</p>
+
+    <table class="env-table">
+      <thead>
+        <tr><th>Variable</th><th>Valeur</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="env-key">MONGODB_URI</span></td><td><span class="env-val">mongodb+srv://pelassyalexandre_db_user:...</span></td><td class="env-desc">Connexion MongoDB Atlas</td></tr>
+        <tr><td><span class="env-key">JWT_SECRET</span></td><td><span class="env-val">changez_ce_secret_jwt_super_long_random</span></td><td class="env-desc">Clé de signature JWT</td></tr>
+        <tr><td><span class="env-key">RESEND_API_KEY</span></td><td><span class="env-val">re_BXJ8po6o_...</span></td><td class="env-desc">Clé API Resend pour les emails</td></tr>
+        <tr><td><span class="env-key">CLOUDINARY_CLOUD_NAME</span></td><td><span class="env-val">dc0pukumb</span></td><td class="env-desc">Nom du cloud Cloudinary</td></tr>
+        <tr><td><span class="env-key">CLOUDINARY_API_KEY</span></td><td><span class="env-val">275815242643133</span></td><td class="env-desc">Clé API Cloudinary</td></tr>
+        <tr><td><span class="env-key">CLOUDINARY_API_SECRET</span></td><td><span class="env-val">275815242643133</span></td><td class="env-desc">Secret Cloudinary</td></tr>
+        <tr><td><span class="env-key">COMUT_OWNER_EMAIL</span></td><td><span class="env-val">pelassyalexandre@gmail.com</span></td><td class="env-desc">Email qui aura le rôle Owner</td></tr>
+        <tr><td><span class="env-key">BASE_URL</span></td><td><span class="env-val">https://comut-backend.onrender.com</span></td><td class="env-desc">URL de votre service Render</td></tr>
+        <tr><td><span class="env-key">NODE_VERSION</span></td><td><span class="env-val">20</span></td><td class="env-desc">Version Node.js sur Render</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-content">
+        <div class="callout-title">Important — Resend</div>
+        <div class="callout-text">Le plan gratuit Resend permet uniquement d'envoyer des emails à votre propre adresse (<strong>pelassyalexandre@gmail.com</strong>) sans domaine vérifié. Pour envoyer à d'autres emails, ajoutez un domaine sur <a href="https://resend.com" style="color:var(--yellow)">resend.com</a> et mettez à jour le champ <code>from</code> dans <code>src/utils/email.js</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>Déployer sur Render</h2>
+    </div>
+    <p class="section-desc">Render va détecter automatiquement votre repo et le déployer. Le fichier <code>render.yaml</code> est déjà configuré.</p>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">1</div><div class="step-item-title">Créer un compte Render</div></div>
+        <div class="step-item-body"><div class="step-item-desc">Allez sur <strong>render.com</strong> → Sign up with GitHub → Autorisez l'accès.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">2</div><div class="step-item-title">Nouveau Web Service</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Tableau de bord Render → <strong>New +</strong> → <strong>Web Service</strong> → <strong>Connect a repository</strong> → sélectionnez <code>alexbg577/comut-backend</code>.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">3</div><div class="step-item-title">Configurer le service</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Remplissez ces champs :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">config render</span></div>
+            <pre><code><span class="hl-key">Name</span>          : <span class="hl-val">comut-backend</span>
+<span class="hl-key">Environment</span>   : <span class="hl-val">Node</span>
+<span class="hl-key">Build Command</span> : <span class="hl-val">npm install</span>
+<span class="hl-key">Start Command</span> : <span class="hl-val">node src/index.js</span>
+<span class="hl-key">Plan</span>          : <span class="hl-val">Free</span></code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">4</div><div class="step-item-title">Ajouter les variables d'environnement</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Avant de cliquer "Create", faites défiler jusqu'à <strong>Environment Variables</strong> et ajoutez toutes les variables du tableau ci-dessus une par une.</div>
+          <div class="callout callout-success">
+            <div class="callout-icon">✅</div>
+            <div class="callout-content">
+              <div class="callout-title">Déploiement automatique</div>
+              <div class="callout-text">Une fois créé, chaque push sur <code>main</code> redéploiera automatiquement le backend. Le premier déploiement prend ~3 minutes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">5</div><div class="step-item-title">Vérifier que l'API fonctionne</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Ouvrez dans votre navigateur :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">url</span></div>
+            <pre><code>https://comut-backend.onrender.com/</code></pre>
+          </div>
+          <div class="step-item-desc">Vous devez voir : <code style="color:var(--green)">{"status":"Comut API ✅","version":"1.0.0"}</code></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn" style="margin-top:16px">
+      <div class="callout-icon">😴</div>
+      <div class="callout-content">
+        <div class="callout-title">Plan Free — Cold Start</div>
+        <div class="callout-text">Sur le plan gratuit Render, le serveur s'endort après 15 minutes d'inactivité. Le premier appel après inactivité prendra ~30 secondes. Pour éviter ça, upgradez vers le plan Starter ($7/mois) ou utilisez un service comme UptimeRobot pour pinger l'API toutes les 10 minutes.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════ WEB ═══════════════════════ -->
+
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2>Créer le repo comut-web sur GitHub</h2>
+    </div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">1</div><div class="step-item-title">Créer le repo</div></div>
+        <div class="step-item-body"><div class="step-item-desc">github.com → <strong>New repository</strong> → Nom : <code>comut-web</code> → <strong>Public</strong> → Create.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">2</div><div class="step-item-title">Uploader les fichiers</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Extrayez <code>comut-web.zip</code> puis :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+            <pre><code><span class="hl-cmd">cd</span> comut-web
+<span class="hl-cmd">git</span> init
+<span class="hl-cmd">git</span> add -A
+<span class="hl-cmd">git</span> commit -m <span class="hl-str">"🌐 Initial commit: Comut Web"</span>
+<span class="hl-cmd">git</span> branch -M main
+<span class="hl-cmd">git</span> remote add origin https://github.com/alexbg577/comut-web.git
+<span class="hl-cmd">git</span> push -u origin main</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2>Activer GitHub Pages</h2>
+    </div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">1</div><div class="step-item-title">Aller dans Settings du repo</div></div>
+        <div class="step-item-body"><div class="step-item-desc">Sur le repo <code>comut-web</code> → onglet <strong>Settings</strong> → section <strong>Pages</strong> dans la sidebar gauche.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">2</div><div class="step-item-title">Configurer la source</div></div>
+        <div class="step-item-body"><div class="step-item-desc"><strong>Source</strong> → <em>Deploy from a branch</em> → Branch : <code>main</code> → Folder : <code>/ (root)</code> → <strong>Save</strong>.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">3</div><div class="step-item-title">Accéder au site</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Après ~2 minutes, votre site sera accessible sur :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">url</span></div>
+            <pre><code>https://alexbg577.github.io/comut-web/</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════ APP MOBILE ═══════════════════════ -->
+
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <h2>Installer les outils</h2>
+    </div>
+    <p class="section-desc">Vous avez besoin de Node.js et de l'outil EAS CLI d'Expo pour builder l'APK en cloud.</p>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">1</div><div class="step-item-title">Installer Node.js 20+</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Téléchargez Node.js LTS depuis <strong>nodejs.org</strong>. Vérifiez l'installation :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+            <pre><code><span class="hl-cmd">node</span> --version   <span class="hl-comment"># doit afficher v20.x.x ou supérieur</span>
+<span class="hl-cmd">npm</span> --version    <span class="hl-comment"># doit afficher 10.x.x ou supérieur</span></code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">2</div><div class="step-item-title">Installer Expo CLI et EAS CLI</div></div>
+        <div class="step-item-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+            <pre><code><span class="hl-cmd">npm</span> install -g expo-cli eas-cli</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">3</div><div class="step-item-title">Créer un compte Expo</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Allez sur <strong>expo.dev</strong> → Sign up (gratuit). Puis connectez-vous en ligne de commande :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+            <pre><code><span class="hl-cmd">eas</span> login   <span class="hl-comment"># Entrez votre email et mot de passe Expo</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <h2>Configurer l'app</h2>
+    </div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">1</div><div class="step-item-title">Extraire et installer les dépendances</div></div>
+        <div class="step-item-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+            <pre><code><span class="hl-cmd">cd</span> comut-app
+<span class="hl-cmd">npm</span> install</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">2</div><div class="step-item-title">Lier à votre compte Expo</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Cette commande crée le projet sur expo.dev et met à jour <code>app.json</code> :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+            <pre><code><span class="hl-cmd">eas</span> init   <span class="hl-comment"># Répondez "comut" quand il demande le nom du projet</span></code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">3</div><div class="step-item-title">Vérifier l'URL du backend</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Ouvrez <code>services/api.js</code> et vérifiez que l'URL pointe bien vers votre backend Render :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">javascript</span></div>
+            <pre><code><span class="hl-key">const</span> BASE_URL = <span class="hl-str">'https://comut-backend.onrender.com/api'</span>;</code></pre>
+          </div>
+          <div class="callout callout-info">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <div class="callout-title">URL différente ?</div>
+              <div class="callout-text">Si Render vous a donné une URL différente (ex: <code>comut-backend-xxxx.onrender.com</code>), mettez-la à jour ici ET dans <code>services/upload.js</code>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <h2>Build APK avec EAS</h2>
+    </div>
+    <p class="section-desc">EAS Build compile votre app dans le cloud — pas besoin d'Android Studio ni de Mac.</p>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">1</div><div class="step-item-title">Lancer le build APK</div></div>
+        <div class="step-item-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+            <pre><code><span class="hl-cmd">eas</span> build --platform android --profile preview</code></pre>
+          </div>
+          <div class="step-item-desc" style="margin-top:10px">Il vous demandera si vous voulez créer un keystore Android — répondez <strong>Y</strong> (Expo le gère automatiquement).</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">2</div><div class="step-item-title">Attendre le build (5-15 min)</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Le build se fait dans le cloud. Vous pouvez suivre la progression sur <strong>expo.dev</strong> → votre projet → Builds. Une fois terminé, un lien de téléchargement APK apparaît.</div>
+          <div class="callout callout-success">
+            <div class="callout-icon">🎉</div>
+            <div class="callout-content">
+              <div class="callout-title">APK prêt !</div>
+              <div class="callout-text">EAS vous envoie un email quand le build est terminé. Vous pouvez aussi retrouver le lien sur expo.dev ou en relançant <code>eas build:list</code>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">3</div><div class="step-item-title">Télécharger l'APK</div></div>
+        <div class="step-item-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+            <pre><code><span class="hl-comment"># Lister les builds récents</span>
+<span class="hl-cmd">eas</span> build:list
+
+<span class="hl-comment"># Ou télécharger directement depuis expo.dev</span>
+<span class="hl-comment"># expo.dev → Votre projet → Builds → Download</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <h2>Installer l'APK sur Android</h2>
+    </div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">1</div><div class="step-item-title">Activer les sources inconnues</div></div>
+        <div class="step-item-body"><div class="step-item-desc">Sur Android : <strong>Paramètres</strong> → <strong>Sécurité</strong> → <strong>Installer des applications inconnues</strong> → activez pour votre navigateur ou gestionnaire de fichiers.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">2</div><div class="step-item-title">Transférer l'APK</div></div>
+        <div class="step-item-body"><div class="step-item-desc">Envoyez l'APK par email, WhatsApp ou câble USB. Ou scannez le QR code depuis expo.dev directement depuis votre téléphone.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">3</div><div class="step-item-title">Installer et ouvrir</div></div>
+        <div class="step-item-body"><div class="step-item-desc">Appuyez sur le fichier APK → <strong>Installer</strong> → <strong>Ouvrir</strong>. L'app Comut apparaît sur votre écran d'accueil.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════ VERIFICATION ═══════════════════════ -->
+
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <h2>Tout tester</h2>
+    </div>
+    <p class="section-desc">Suivez cette checklist pour vous assurer que tout fonctionne correctement.</p>
+
+    <div class="checklist">
+      <div class="check-item"><div class="check-box"></div><div><strong>API Backend</strong> — <code>https://comut-backend.onrender.com/</code> répond <code>{"status":"Comut API ✅"}</code></div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Site Web</strong> — <code>https://alexbg577.github.io/comut-web/</code> s'affiche correctement</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Inscription</strong> — Créez un compte dans l'app → email de vérification reçu</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Vérification email</strong> — Cliquez le lien dans l'email → page "Email vérifié ✅"</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Connexion</strong> — Connexion avec email + MDP → accès à l'écran "Créer/Rejoindre groupe"</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Groupe</strong> — Créez un groupe → code unique généré → rejoignez avec un autre compte</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Upload</strong> — Uploadez une photo → visible dans Publications</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Shorts</strong> — L'onglet Shorts affiche vos contenus en scroll vertical</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Like & Favori</strong> — Likez un contenu → compteur mis à jour / Favoris → visible dans l'onglet Favoris</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Commentaires</strong> — Ajoutez un commentaire → visible immédiatement</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Mode offline</strong> — Désactivez le wifi → l'app affiche le cache</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Owner Comut</strong> — Connectez-vous avec <code>pelassyalexandre@gmail.com</code> → panneau admin visible</div></div>
+      <div class="check-item"><div class="check-box"></div><div><strong>Mot de passe oublié</strong> — Testez la réinitialisation par email</div></div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section" id="faq">
+    <div class="section-header">
+      <div class="section-num">?</div>
+      <h2>FAQ — Problèmes fréquents</h2>
+    </div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">Q</div><div class="step-item-title">Le backend ne démarre pas sur Render</div></div>
+        <div class="step-item-body"><div class="step-item-desc">Vérifiez les logs Render. Cause la plus fréquente : variable d'environnement manquante, notamment <code>MONGODB_URI</code>. Assurez-vous d'avoir ajouté toutes les variables dans Settings → Environment.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">Q</div><div class="step-item-title">L'email de vérification n'arrive pas</div></div>
+        <div class="step-item-body"><div class="step-item-desc">Sur le plan Resend gratuit sans domaine vérifié, les emails ne peuvent être envoyés qu'à votre propre adresse (<code>pelassyalexandre@gmail.com</code>). Pour les autres utilisateurs, ajoutez un domaine vérifié sur resend.com et mettez à jour le champ <code>from</code> dans <code>src/utils/email.js</code>.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">Q</div><div class="step-item-title">EAS build échoue</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Vérifiez que vous avez bien lancé <code>eas init</code> avant le build. Si l'erreur concerne un module natif, nettoyez le cache :</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre><code><span class="hl-cmd">eas</span> build --platform android --profile preview --clear-cache</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">Q</div><div class="step-item-title">Upload de fichiers échoue (> 100MB)</div></div>
+        <div class="step-item-body"><div class="step-item-desc">Cloudinary gratuit limite les uploads à <strong>100 MB par fichier</strong> (pas 3 GB). Pour les gros fichiers, passez au plan Cloudinary payant ou réduisez la limite dans <code>src/routes/content.js</code>.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">Q</div><div class="step-item-title">L'app affiche "Erreur réseau"</div></div>
+        <div class="step-item-body"><div class="step-item-desc">Le backend Render est probablement en "cold start" (endormi). Attendez 30 secondes et réessayez. Vous pouvez utiliser <strong>UptimeRobot</strong> (gratuit) pour pinger l'API toutes les 10 minutes et éviter l'endormissement.</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-item-header"><div class="step-item-num">Q</div><div class="step-item-title">Mettre à jour l'app après modifications</div></div>
+        <div class="step-item-body">
+          <div class="step-item-desc">Pour le backend : faites un <code>git push</code> et Render redéploie automatiquement. Pour l'app mobile : relancez un build EAS et redistribuez l'APK.</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre><code><span class="hl-comment"># Mise à jour backend</span>
+<span class="hl-cmd">git</span> add -A && git commit -m "update" && git push
+
+<span class="hl-comment"># Nouveau build APK</span>
+<span class="hl-cmd">eas</span> build --platform android --profile preview</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.1));border:1px solid rgba(99,102,241,0.25);border-radius:20px;padding:32px;text-align:center;margin-top:40px">
+    <div style="font-size:40px;margin-bottom:12px">🎉</div>
+    <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px">Comut est prêt !</div>
+    <div style="font-size:14px;color:var(--text-muted)">Partagez le code de votre groupe avec vos proches et commencez à utiliser Comut.</div>
+  </div>
+
+</main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent.trim()).then(() => {
+    btn.textContent = 'Copié ✓';
+    setTimeout(() => btn.textContent = 'Copier', 2000);
+  });
+}
+
+// Active sidebar link on scroll
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('.sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+  links.forEach(a => {
+    a.classList.remove('active');
+    if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

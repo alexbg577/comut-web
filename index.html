@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comut — Partagez avec vos proches</title>
+  <meta name="description" content="Comut est une application privée de partage de photos, vidéos et musique avec vos proches. Créez votre groupe et partagez en toute intimité." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #8b5cf6;
+      --accent: #a78bfa;
+      --bg: #ffffff;
+      --surface: #f9fafb;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --text-light: #9ca3af;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --shadow: 0 4px 24px rgba(99,102,241,0.12);
+      --shadow-lg: 0 20px 60px rgba(99,102,241,0.18);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: white;
+    }
+    .nav-logo-text { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 14px; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .nav-cta { background: var(--primary); color: white; padding: 8px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; transition: transform 0.2s, box-shadow 0.2s; }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,0.35); }
+
+    /* HERO */
+    .hero {
+      min-height: 90vh; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 80px 24px;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.12) 0%, transparent 70%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%);
+      top: -200px; right: -100px; pointer-events: none;
+    }
+    .hero-content { max-width: 720px; position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));
+      border: 1px solid rgba(99,102,241,0.25); border-radius: 100px;
+      padding: 6px 16px; font-size: 13px; font-weight: 600; color: var(--primary);
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(40px, 7vw, 72px); font-weight: 900; line-height: 1.05;
+      letter-spacing: -2px; color: var(--text); margin-bottom: 20px;
+    }
+    .hero h1 span { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 18px; color: var(--text-muted); margin-bottom: 40px; line-height: 1.7; max-width: 540px; margin-inline: auto; }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; padding: 14px 28px; border-radius: 14px; text-decoration: none;
+      font-weight: 700; font-size: 16px; transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,102,241,0.45); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: white; color: var(--text); padding: 14px 28px; border-radius: 14px;
+      text-decoration: none; font-weight: 600; font-size: 16px;
+      border: 1.5px solid var(--border); transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* PHONE MOCKUP */
+    .hero-visual { margin-top: 64px; display: flex; justify-content: center; gap: 20px; align-items: flex-start; }
+    .phone-mockup {
+      width: 220px; background: #1f2937; border-radius: 36px;
+      padding: 12px; box-shadow: 0 40px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08);
+      position: relative;
+    }
+    .phone-mockup.featured { transform: scale(1.06) translateY(-12px); z-index: 2; }
+    .phone-screen { background: var(--surface); border-radius: 26px; overflow: hidden; }
+    .phone-bar { background: var(--primary); padding: 12px 16px; }
+    .phone-bar-title { color: white; font-weight: 800; font-size: 14px; }
+    .phone-content { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .phone-card { background: white; border-radius: 12px; overflow: hidden; }
+    .phone-card-img { height: 90px; background: linear-gradient(135deg, #e0e7ff, #c7d2fe); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+    .phone-card-body { padding: 8px 10px; }
+    .phone-card-user { font-size: 10px; font-weight: 700; color: var(--text); }
+    .phone-card-actions { display: flex; gap: 10px; margin-top: 4px; }
+    .phone-card-action { font-size: 12px; color: var(--text-muted); }
+    .phone-shorts { height: 200px; background: linear-gradient(180deg, #1e1b4b, #312e81); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 12px; gap: 6px; }
+    .phone-shorts-icon { font-size: 40px; }
+    .phone-shorts-text { color: white; font-size: 10px; font-weight: 700; }
+
+    /* FEATURES */
+    section { padding: 100px 24px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-label { font-size: 12px; font-weight: 700; color: var(--primary); letter-spacing: 1.5px; text-transform: uppercase; text-align: center; margin-bottom: 12px; }
+    .section-title { font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: var(--text); text-align: center; letter-spacing: -1px; margin-bottom: 16px; }
+    .section-desc { font-size: 16px; color: var(--text-muted); text-align: center; max-width: 560px; margin: 0 auto 56px; line-height: 1.7; }
+
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .feature-card {
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg);
+      padding: 28px; transition: all 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(99,102,241,0.3); box-shadow: var(--shadow); transform: translateY(-4px); }
+    .feature-icon { font-size: 36px; margin-bottom: 16px; display: block; }
+    .feature-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .feature-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* HOW IT WORKS */
+    .how-bg { background: linear-gradient(135deg, #f0f0ff 0%, #faf5ff 100%); }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+    .step { text-align: center; padding: 28px 20px; }
+    .step-num {
+      width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 900; color: white;
+    }
+    .step-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ROLES */
+    .roles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .role-card { border-radius: var(--radius); padding: 24px; text-align: center; }
+    .role-card.owner { background: linear-gradient(135deg, #eef2ff, #e0e7ff); border: 1.5px solid #c7d2fe; }
+    .role-card.admin { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 1.5px solid #6ee7b7; }
+    .role-card.member { background: linear-gradient(135deg, #f3f4f6, #e5e7eb); border: 1.5px solid #d1d5db; }
+    .role-card.app-owner { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1.5px solid #fcd34d; }
+    .role-icon { font-size: 36px; margin-bottom: 12px; }
+    .role-title { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .role-perms { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 4px; }
+    .role-perms li { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .role-perms li::before { content: '✓'; color: var(--primary); font-weight: 700; }
+
+    /* TECH STACK */
+    .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .tech-card {
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 20px 16px; text-align: center; transition: all 0.2s;
+    }
+    .tech-card:hover { border-color: var(--primary); background: #eef2ff; }
+    .tech-card-icon { font-size: 28px; margin-bottom: 8px; }
+    .tech-card-name { font-size: 13px; font-weight: 700; color: var(--text); }
+    .tech-card-role { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* CTA */
+    .cta-section {
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      padding: 80px 24px;
+    }
+    .cta-section h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: white; letter-spacing: -1px; margin-bottom: 16px; }
+    .cta-section p { font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 36px; }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-white { background: white; color: var(--primary); padding: 14px 28px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 16px; transition: all 0.2s; }
+    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+    .btn-outline-white { background: transparent; color: white; padding: 14px 28px; border-radius: 14px; text-decoration: none; font-weight: 600; font-size: 16px; border: 1.5px solid rgba(255,255,255,0.5); transition: all 0.2s; }
+    .btn-outline-white:hover { background: rgba(255,255,255,0.1); }
+
+    /* FOOTER */
+    footer { background: #0f172a; color: rgba(255,255,255,0.6); padding: 48px 24px; text-align: center; }
+    footer .footer-logo { font-size: 24px; font-weight: 900; color: white; margin-bottom: 12px; }
+    footer p { font-size: 14px; margin-bottom: 20px; }
+    footer .footer-links { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+    footer .footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+    footer .footer-links a:hover { color: white; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 60px 20px; }
+      .hero-visual { flex-direction: column; align-items: center; }
+      .phone-mockup { width: 200px; }
+      .phone-mockup.featured { transform: none; }
+      section { padding: 60px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">C</div>
+    <span class="nav-logo-text">Comut</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Fonctionnalités</a>
+    <a href="#how">Comment ça marche</a>
+    <a href="#roles">Rôles</a>
+    <a href="#tech">Technologie</a>
+  </div>
+  <a href="#download" class="nav-cta">📲 Télécharger</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-content">
+      <div class="hero-badge">✨ Application privée de partage</div>
+      <h1>Partagez vos <span>moments</span> avec vos proches</h1>
+      <p>Comut est votre espace privé pour partager photos, vidéos et musique avec votre famille et vos amis. Aucune publicité, aucun algorithme — juste vous et vos proches.</p>
+      <div class="hero-btns">
+        <a href="#download" class="btn-primary">📲 Télécharger l'APK</a>
+        <a href="#how" class="btn-secondary">En savoir plus →</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="phone-mockup">
+        <div class="phone-screen">
+          <div class="phone-bar"><div class="phone-bar-title">Comut</div></div>
+          <div class="phone-content">
+            <div class="phone-card">
+              <div class="phone-card-img">📸</div>
+              <div class="phone-card-body">
+                <div class="phone-card-user">Marie · il y a 2h</div>
+                <div class="phone-card-actions">
+                  <span class="phone-card-action">❤️ 12</span>
+                  <span class="phone-card-action">💬 3</span>
+                  <span class="phone-card-action">⭐</span>
+                </div>
+              </div>
+            </div>
+            <div class="phone-card">
+              <div class="phone-card-img">🎵</div>
+              <div class="phone-card-body">
+                <div class="phone-card-user">Thomas · hier</div>
+                <div class="phone-card-actions">
+                  <span class="phone-card-action">❤️ 5</span>
+                  <span class="phone-card-action">💬 1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-mockup featured">
+        <div class="phone-screen">
+          <div class="phone-shorts">
+            <span class="phone-shorts-icon">🎬</span>
+            <span class="phone-shorts-text">Shorts — Style TikTok</span>
+            <div style="width:100%;background:rgba(255,255,255,0.1);border-radius:8px;padding:8px;margin-top:4px">
+              <div style="color:white;font-size:10px;font-weight:700">Papa 👑</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:9px;margin-top:2px">Vidéo vacances été 2024</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-mockup">
+        <div class="phone-screen">
+          <div class="phone-bar" style="background:#111827"><div class="phone-bar-title" style="font-size:13px">👤 Mon compte</div></div>
+          <div class="phone-content">
+            <div style="background:white;border-radius:12px;padding:12px;text-align:center">
+              <div style="width:40px;height:40px;border-radius:12px;background:#6366f1;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white">A</div>
+              <div style="font-size:11px;font-weight:800;color:#111">Alexandre</div>
+              <div style="font-size:9px;color:#9ca3af;margin-top:2px">👑 Owner Comut</div>
+            </div>
+            <div style="background:white;border-radius:10px;padding:8px 10px">
+              <div style="font-size:10px;font-weight:700;color:#111">👥 Famille Martin</div>
+              <div style="font-size:9px;color:#9ca3af">Code : ABC123 · 4 membres</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-label">Fonctionnalités</div>
+    <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+    <p class="section-desc">Une application complète pensée pour le partage en famille et entre amis, avec toutes les fonctionnalités modernes.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">📸</span>
+        <div class="feature-title">Photos, Vidéos & Musique</div>
+        <div class="feature-desc">Uploadez jusqu'à 3 Go par fichier. Supports ZIP pour uploader en masse. Tout s'affiche normalement dans l'app.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">▶️</span>
+        <div class="feature-title">Shorts style TikTok</div>
+        <div class="feature-desc">Parcourez vos photos et vidéos dans un feed vertical immersif. Les photos s'accompagnent de musique aléatoire de votre groupe.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">👥</span>
+        <div class="feature-title">Groupes privés</div>
+        <div class="feature-desc">Chaque groupe est unique avec un code d'invitation. Votre contenu est invisible aux autres groupes — 100% privé.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📡</span>
+        <div class="feature-title">Mode hors connexion</div>
+        <div class="feature-desc">L'app synchronise tout avec le Wi-Fi ou les données. Naviguez votre contenu même sans connexion internet.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⬆️</span>
+        <div class="feature-title">Upload en arrière-plan</div>
+        <div class="feature-desc">Uploadez vos fichiers et continuez à utiliser l'app normalement. Pas besoin d'attendre — une barre de progression s'affiche.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💬</span>
+        <div class="feature-title">Commentaires & Likes</div>
+        <div class="feature-desc">Réagissez avec des likes et commentaires sur chaque contenu. Ajoutez en favoris pour retrouver facilement vos préférés.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⛶</span>
+        <div class="feature-title">Plein écran & Rotation</div>
+        <div class="feature-desc">Passez en plein écran pour les photos et vidéos. La rotation automatique s'active pour une expérience immersive.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔗</span>
+        <div class="feature-title">Partage externe</div>
+        <div class="feature-desc">L'owner du groupe peut activer ou désactiver le partage externe dans les paramètres. Contrôlez votre vie privée.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔐</span>
+        <div class="feature-title">Sécurité renforcée</div>
+        <div class="feature-desc">Vérification d'email obligatoire, JWT sécurisé, mots de passe hashés (bcrypt), réinitialisation par email.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="how-bg">
+  <div class="container">
+    <div class="section-label">Comment ça marche</div>
+    <h2 class="section-title">Prêt en 3 minutes</h2>
+    <p class="section-desc">Installez l'app, créez votre compte et commencez à partager avec vos proches dès maintenant.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Installez l'APK</div>
+        <div class="step-desc">Téléchargez et installez l'APK Comut sur votre téléphone Android. Activez les sources inconnues si nécessaire.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Créez votre compte</div>
+        <div class="step-desc">Entrez votre email, un pseudo et un mot de passe. Vérifiez votre email pour activer votre compte.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Créez ou rejoignez un groupe</div>
+        <div class="step-desc">Créez votre espace privé ou entrez le code de 6 lettres partagé par un proche.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Partagez !</div>
+        <div class="step-desc">Uploadez photos, vidéos et musique. Commentez, likez et profitez des Shorts en famille.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<section id="roles">
+  <div class="container">
+    <div class="section-label">Système de rôles</div>
+    <h2 class="section-title">Un système hiérarchique clair</h2>
+    <p class="section-desc">Chaque utilisateur a un rôle avec des permissions spécifiques pour une gestion simple et sécurisée.</p>
+
+    <div class="roles-grid">
+      <div class="role-card app-owner">
+        <div class="role-icon">👑</div>
+        <div class="role-title">Owner Comut</div>
+        <ul class="role-perms">
+          <li>Accès à tous les comptes</li>
+          <li>Supprimer n'importe quel utilisateur</li>
+          <li>Modifier les MDP de tous</li>
+          <li>Voir et supprimer tous les groupes</li>
+          <li>Tableau de bord global</li>
+        </ul>
+      </div>
+      <div class="role-card owner">
+        <div class="role-icon">⭐</div>
+        <div class="role-title">Owner de groupe</div>
+        <ul class="role-perms">
+          <li>Créer et gérer son groupe</li>
+          <li>Promouvoir des admins</li>
+          <li>Exclure des membres</li>
+          <li>Activer le partage externe</li>
+          <li>Supprimer tout contenu</li>
+        </ul>
+      </div>
+      <div class="role-card admin">
+        <div class="role-icon">🛡</div>
+        <div class="role-title">Admin de groupe</div>
+        <ul class="role-perms">
+          <li>Exclure des membres</li>
+          <li>Supprimer des contenus</li>
+          <li>Modérer les commentaires</li>
+          <li>Voir la liste des membres</li>
+        </ul>
+      </div>
+      <div class="role-card member">
+        <div class="role-icon">👤</div>
+        <div class="role-title">Membre</div>
+        <ul class="role-perms">
+          <li>Uploader des contenus</li>
+          <li>Liker et commenter</li>
+          <li>Ajouter en favoris</li>
+          <li>Voir les Shorts</li>
+          <li>Supprimer ses propres contenus</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section id="tech" style="background:var(--surface)">
+  <div class="container">
+    <div class="section-label">Stack technique</div>
+    <h2 class="section-title">Construit avec les meilleures technologies</h2>
+    <p class="section-desc">Comut repose sur un stack moderne, performant et open-source.</p>
+
+    <div class="tech-grid">
+      <div class="tech-card"><div class="tech-card-icon">⚛️</div><div class="tech-card-name">React Native</div><div class="tech-card-role">Application mobile</div></div>
+      <div class="tech-card"><div class="tech-card-icon">🟢</div><div class="tech-card-name">Node.js</div><div class="tech-card-role">Backend API</div></div>
+      <div class="tech-card"><div class="tech-card-icon">🍃</div><div class="tech-card-name">MongoDB</div><div class="tech-card-role">Base de données</div></div>
+      <div class="tech-card"><div class="tech-card-icon">☁️</div><div class="tech-card-name">Cloudinary</div><div class="tech-card-role">Stockage médias</div></div>
+      <div class="tech-card"><div class="tech-card-icon">📧</div><div class="tech-card-name">Resend</div><div class="tech-card-role">Emails transactionnels</div></div>
+      <div class="tech-card"><div class="tech-card-icon">🚀</div><div class="tech-card-name">Render</div><div class="tech-card-role">Hébergement backend</div></div>
+      <div class="tech-card"><div class="tech-card-icon">🔑</div><div class="tech-card-name">JWT + bcrypt</div><div class="tech-card-role">Sécurité & Auth</div></div>
+      <div class="tech-card"><div class="tech-card-icon">📦</div><div class="tech-card-name">Expo EAS</div><div class="tech-card-role">Build APK cloud</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD CTA -->
+<section id="download" class="cta-section">
+  <h2>Commencez dès aujourd'hui 🚀</h2>
+  <p>Gratuit, privé, sans publicité. Partagez avec les personnes qui comptent vraiment.</p>
+  <div class="cta-btns">
+    <a href="https://github.com/alexbg577/comut-backend/releases" class="btn-white">📲 Télécharger l'APK Android</a>
+    <a href="https://github.com/alexbg577/comut-backend" class="btn-outline-white">GitHub →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Comut</div>
+  <p>Application privée de partage multimédia · Fait avec ❤️</p>
+  <div class="footer-links">
+    <a href="https://github.com/alexbg577/comut-backend">Backend GitHub</a>
+    <a href="https://github.com/alexbg577/comut-web">Web GitHub</a>
+    <a href="https://comut-backend.onrender.com">API</a>
+  </div>
+</footer>
+
+</body>
+</html>
